@@ -21,7 +21,7 @@ dependencies = [
     "ultralytics==8.4.178",
     "pillow==12.3.0",
     "psycopg[binary]==3.3.3",
-    "psycopg-pool==3.3.0",
+    "psycopg-pool==3.3.3",
 ]
 
 [project.optional-dependencies]
