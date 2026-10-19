@@ -1,0 +1,16 @@
+*
+!app/
+!app/**
+!certs/
+!certs/supabase-root.crt
+!requirements-cloud.txt
+!Dockerfile.vercel
+!Dockerfile.worker
+**/__pycache__/**
+**/.env*
+**/*.pt
+**/*.db
+**/*.sqlite*
+
+!requirements-identity.txt
+!Dockerfile.identity

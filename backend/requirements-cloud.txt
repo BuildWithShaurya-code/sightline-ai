@@ -1,0 +1,17 @@
+# Runtime and test dependencies verified together on Python 3.12.
+# Model weights are provisioned separately; never download generic substitute weights.
+fastapi==0.143.2
+uvicorn[standard]==0.54.0
+pydantic==2.14.1
+pydantic-settings==2.16.0
+python-multipart==0.0.32
+supabase==2.33.0
+PyJWT[crypto]==2.15.1
+bcrypt==5.0.0
+httpx==0.28.1
+numpy==2.5.4
+opencv-python==5.0.0.93
+ultralytics==8.4.178
+pillow==12.3.0
+psycopg[binary]==3.3.3
+psycopg-pool==3.3.0

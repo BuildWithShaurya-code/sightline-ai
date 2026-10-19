@@ -1,0 +1,30 @@
+/* Isolated SDK adapter checks. These do not certify a live Supabase project or its RLS. */
+const assert=require('node:assert/strict'),path=require('node:path'),fs=require('node:fs');
+const root=path.resolve(__dirname,'..'),esbuild=require(path.join(root,'node_modules/esbuild'));
+const target='/tmp/sightline-security-setup-checks.cjs';
+esbuild.buildSync({stdin:{contents:`export * from './src/services/securitySetup.ts';export * from './src/services/securitySetupStore.ts';export * from './src/services/securityResponse.ts';`,resolveDir:root},bundle:true,platform:'node',format:'cjs',outfile:target,logLevel:'silent'});
+const {emptySecuritySetup,validateSecuritySetup,indianPhone,securitySetupComplete,createSecuritySetupStore,setupAddress,shortIncidentSummary,reportForIncident,whatsappUrl}=require(target);
+const fixture={...emptySecuritySetup,propertyName:'Test property',fullAddress:'Test address',city:'Test city',state:'Test state',pinCode:'123456',contactName:'Test desk',phone:'9000000000'};
+(async()=>{
+ const blank=validateSecuritySetup(emptySecuritySetup);assert.equal(Object.keys(blank.errors).length,7);
+ for(const pin of ['','12345','1234567','012345','12a456'])assert.ok(validateSecuritySetup({...fixture,pinCode:pin}).errors.pinCode);
+ assert.equal(indianPhone('90000 00000'),'+919000000000');assert.equal(indianPhone('+91 90000 00000'),'+919000000000');assert.equal(indianPhone('call9000000000'),'');
+ const valid=validateSecuritySetup(fixture);assert.deepEqual(valid.errors,{});assert.equal(valid.data.whatsappPhone,valid.data.phone);assert.ok(securitySetupComplete(valid.data));
+ const separate=validateSecuritySetup({...fixture,usePhoneForWhatsapp:false,whatsappPhone:'8000000000'});assert.equal(separate.data.whatsappPhone,'+918000000000');
+ assert.ok(validateSecuritySetup({...fixture,usePhoneForWhatsapp:false}).errors.whatsappPhone);
+ const preserved={...fixture,pinCode:'bad'};validateSecuritySetup(preserved);assert.equal(preserved.pinCode,'bad');
+ await assert.rejects(()=>createSecuritySetupStore(null).load(),/Private account saving is not connected/);
+ await assert.rejects(()=>createSecuritySetupStore(null).save(valid.data),/Private account saving is not connected/);
+ let user='owner-a',failure=false,switchAfterRead=false;const rows=new Map(),requests=[];
+ const client={auth:{getSession:async()=>({data:{session:user?{user:{id:user},expires_at:Math.floor(Date.now()/1000)+3600}:null},error:null})},from(table){assert.equal(table,'security_settings');let id,payload;const builder={select(){return builder},eq(key,value){assert.equal(key,'user_id');id=value;requests.push(['read',value]);return builder},upsert(value,options){assert.equal(options.onConflict,'user_id');payload=value;requests.push(['write',value.user_id]);return builder},async maybeSingle(){const row=rows.get(id);if(switchAfterRead){user='owner-b';switchAfterRead=false;}return {data:row?{details:row}:null,error:null}},async single(){if(failure)return {data:null,error:{message:'offline'}};assert.equal(payload.user_id,user);rows.set(user,payload.details);return {data:{details:payload.details},error:null}}};return builder}};
+ const store=createSecuritySetupStore(client);assert.equal(await store.load(),null);await store.save(fixture);assert.equal((await store.load()).propertyName,'Test property');
+ await store.save({...fixture,propertyName:'Edited property'});assert.equal((await store.load()).propertyName,'Edited property');
+ user='owner-b';await assert.rejects(()=>store.save(fixture,'owner-a'),/Account changed/);assert.equal(await store.load(),null);await store.save({...fixture,propertyName:'B property'});user='owner-a';assert.equal((await store.load()).propertyName,'Edited property');assert.equal(rows.get('owner-b').propertyName,'B property');
+ failure=true;await assert.rejects(()=>store.save(fixture),/not saved/);assert.equal(rows.get('owner-a').propertyName,'Edited property');failure=false;
+ switchAfterRead=true;await assert.rejects(()=>store.load(),/Account changed/);user=null;await assert.rejects(()=>store.load(),/Your session has ended/);
+ assert.ok(requests.every(r=>r[1]==='owner-a'||r[1]==='owner-b'));
+ const inc={id:'QA',status:'confirmed',createdAt:'2026-10-18T00:00:00Z',sourceId:'QA Camera',zone:'QA zone',frames:[],detections:[{classId:'mask',confidence:.8}],title:'QA alert'};
+ const contacts={securityName:fixture.contactName,securityPhone:valid.data.phone,siteAddress:setupAddress(valid.data),policePhone:'112'};
+ assert.ok(shortIncidentSummary(inc,contacts).includes('Test property, Test address'));assert.ok(reportForIncident(inc,contacts,'reviewed').includes('123456'));assert.ok(whatsappUrl(separate.data.whatsappPhone,'Review draft').startsWith('https://wa.me/918000000000?text='));
+ console.log('PASS: required fields, PIN/phone validation, optional WhatsApp, unchanged invalid drafts, unavailable persistence, save/edit/failure, SDK owner scoping/switch checks and summary numbers/address. SDK persistence checks use an isolated fake; live RLS remains unverified.');
+})().catch(e=>{console.error(e);process.exitCode=1});

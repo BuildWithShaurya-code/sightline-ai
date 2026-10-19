@@ -1,0 +1,14 @@
+FROM python:3.12-slim-bookworm
+ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=2 \
+    STORAGE_BACKEND=supabase CLOUD_WORKER=false MEDIA_DIR=/tmp/sightline-media \
+    MODEL_PATH=/tmp/sightline-models/best.pt YOLO_CONFIG_DIR=/tmp/ultralytics
+WORKDIR /app
+RUN apt-get update && apt-get install -y --no-install-recommends libgl1 libglib2.0-0 && rm -rf /var/lib/apt/lists/*
+COPY requirements-cloud.txt ./requirements.txt
+RUN pip install --no-cache-dir --index-url https://download.pytorch.org/whl/cpu torch==2.14.1 torchvision==0.29.1 && pip install --no-cache-dir -r requirements.txt
+COPY app ./app
+COPY certs ./certs
+RUN useradd --uid 10001 --create-home sightline
+USER sightline
+EXPOSE 8000
+CMD ["sh","-c","exec uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000} --workers 1 --no-access-log"]

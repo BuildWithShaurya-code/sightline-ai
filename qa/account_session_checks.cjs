@@ -1,0 +1,22 @@
+const assert=require('node:assert/strict'),path=require('node:path'),fs=require('node:fs');
+const root=path.resolve(__dirname,'..'),esbuild=require(path.join(root,'node_modules/esbuild'));
+const out=path.join(root,'qa/.account-session.cjs');
+const storage=()=>{const rows=new Map();return {getItem:k=>rows.get(k)||null,setItem:(k,v)=>rows.set(k,v),removeItem:k=>rows.delete(k)}};
+global.sessionStorage=storage();global.localStorage=storage();
+let callback,session=null,identity=null,invalid=false,throws=false,backend=0,receivedPassword='';
+const account={id:'owner-a',email:'qa@example.test'};
+global.__accountClient={auth:{onAuthStateChange(fn){callback=fn;return {data:{subscription:{unsubscribe(){}}}}},async getSession(){return {data:{session},error:null}},async getUser(){return {data:{user:identity},error:invalid?{message:'expired'}:null}},async signOut(){session=null;identity=null;callback('SIGNED_OUT',null)},async signInWithPassword(input){receivedPassword=input.password;if(throws)throw Error('offline');if(invalid)return {data:{session:null},error:{code:'invalid_credentials'}};identity=account;session={user:account,access_token:'test-user-token'};callback('SIGNED_IN',session);return {data:{session},error:null}}}};
+global.fetch=async(url)=>{if(url==='/api/v1/auth/username')return {ok:true,json:async()=>({username:null})};if(url==='/api/v1/auth/username-login')return {ok:false,json:async()=>({message:'Username or password is incorrect.'})};backend++;throw Error('Connected sign-in must not call demo login')};
+(async()=>{
+ await esbuild.build({entryPoints:[path.join(root,'src/services/auth.ts')],bundle:true,platform:'node',format:'cjs',outfile:out,define:{'import.meta.env':'{"VITE_SUPABASE_URL":"https://example.test","VITE_SUPABASE_PUBLISHABLE_KEY":"public-test-only"}'},plugins:[{name:'fake-account',setup(build){build.onResolve({filter:/^@supabase\/supabase-js$/},()=>({path:'account',namespace:'fake'}));build.onLoad({filter:/.*/,namespace:'fake'},()=>({contents:'export const createClient=()=>globalThis.__accountClient;',loader:'js'}));}}],logLevel:'silent'});
+ const auth=require(out);
+ localStorage.setItem('sightline_auth_session',JSON.stringify({operatorId:'legacy',token:'local-demo-token'}));
+ assert.equal(auth.getCurrentAccountId(),null);assert.equal(auth.isAuthenticated(),false);assert.equal(await auth.restoreSession(),false);assert.equal(auth.getStoredSession(),null);assert.equal(await auth.getAccessToken(),null);
+ invalid=true;assert.equal((await auth.login('qa@example.test','bad-password')).success,false);assert.equal((await auth.login('qa','test-password')).success,false);assert.equal(backend,0);
+ throws=true;assert.equal((await auth.login('qa@example.test','test-password')).success,false);assert.equal(backend,0);throws=false;invalid=false;
+ assert.equal((await auth.login('qa@example.test',' password with spaces ')).success,true);assert.equal(receivedPassword,' password with spaces ');assert.equal(auth.isAuthenticated(),true);
+ assert.equal(auth.getCurrentAccountId(),'owner-a');assert.equal(await auth.restoreSession(),true);assert.equal(await auth.getAccessToken(),'test-user-token');
+ session={...session,user:{id:'owner-b',email:'second@example.test'},access_token:'refreshed-test-token'};identity=session.user;callback('TOKEN_REFRESHED',session);assert.equal(auth.getCurrentAccountId(),'owner-b');assert.equal(auth.getCurrentOperator().operatorId,'second');assert.equal(await auth.getAccessToken(),'refreshed-test-token');
+ await auth.logout();assert.equal(auth.getCurrentAccountId(),null);assert.equal(auth.isAuthenticated(),false);assert.equal(auth.getStoredSession(),null);assert.equal(backend,0);
+ console.log('PASS: configured sign-in rejects bad email/username credentials without demo fallback, preserves exact password input, restores account identity, synchronizes refresh/sign-out and never uses stale demo tokens. Mock SDK only.');
+})().catch(e=>{console.error(e);process.exitCode=1}).finally(()=>fs.rmSync(out,{force:true}));

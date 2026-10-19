@@ -1,0 +1,39 @@
+[project]
+name = "sightline-backend"
+version = "1.0.0"
+description = "SightLine AI - Physical Threat Detection Backend Service"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "fastapi==0.143.2",
+    "uvicorn[standard]==0.54.0",
+    "pydantic==2.14.1",
+    "pydantic-settings==2.16.0",
+    "python-multipart==0.0.32",
+    "supabase==2.33.0",
+    "PyJWT[crypto]==2.15.1",
+    "bcrypt==5.0.0",
+    "httpx==0.28.1",
+    "numpy==2.5.4",
+    "opencv-python==5.0.0.93",
+    "torch==2.14.1",
+    "torchvision==0.29.1",
+    "ultralytics==8.4.178",
+    "pillow==12.3.0",
+    "psycopg[binary]==3.3.3",
+    "psycopg-pool==3.3.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest==9.1.1"]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+]

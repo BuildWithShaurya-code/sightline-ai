@@ -1,0 +1,12 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
+const root=path.resolve(__dirname,'..'),app=fs.readFileSync(path.join(root,'src/App.tsx'),'utf8');
+assert.ok(!app.includes('await getMe('));assert.ok(!app.includes('AccountSettingsScreen'));
+assert.match(app,/handleSignInSuccess = \(\) => \{\s*if\(isAuthenticated\(\)\)navigateTo\('security-setup'\)/);
+assert.match(app,/targetScreen = 'security-setup';\s*window.location.hash = '#\/security-setup'/);
+assert.ok(app.includes("key={accountKey||'signed-out'}"));assert.ok(app.includes('getCurrentAccountId()!==accountRef.current'));
+const dashboard=fs.readFileSync(path.join(root,'src/components/screens/DashboardScreen.tsx'),'utf8');
+assert.ok(!dashboard.includes('getIncidents'));assert.ok(!dashboard.includes('localStorage.getItem'));assert.ok(!app.includes('localStorage.getItem'));
+const menu=fs.readFileSync(path.join(root,'src/components/navigation/TacticalHeader.tsx'),'utf8');
+assert.ok(!menu.includes('Sign-in &amp; security'));assert.ok(!menu.includes('#/account-settings'));
+assert.ok(menu.includes('Security contacts &amp; location'));
+console.log('PASS: every explicit sign-in opens private security setup immediately; no model/profile request blocks startup; retired account screen and menu entry are removed. Source routing checks.');

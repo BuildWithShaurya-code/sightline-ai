@@ -1,0 +1,77 @@
+name: Repository checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: repository-checks-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  frontend:
+    name: Frontend and configuration
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4, verified 2026-10-19
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+      - run: node scripts/check-vercel-preflight.mjs
+      - name: Source and rendering checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          for check in qa/*_checks.cjs; do node "$check"; done
+      - name: Validate publishable package
+        run: python3 scripts/export_review_package.py --check
+
+  backend-contracts:
+    name: Backend security and contracts (model-free)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      ENVIRONMENT: test
+      MEDIA_DIR: ${{ runner.temp }}/sightline-test-storage/media
+      MODEL_PATH: ${{ runner.temp }}/not-provisioned.pt
+      SUPABASE_URL: https://fixture.supabase.co
+      PYTHONPYCACHEPREFIX: ${{ runner.temp }}/sightline-pycache
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+      - name: Install OS libraries for OpenCV
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libgl1 libglib2.0-0
+      - name: Install CPU inference wheels
+        run: python -m pip install --index-url https://download.pytorch.org/whl/cpu torch==2.14.1 torchvision==0.29.1
+      - run: python -m pip install -r backend/requirements.txt
+      - run: python -m pip check
+      - name: Public tests without private model or footage
+        run: >-
+          python -m pytest
+          backend/tests/test_schemas.py
+          backend/tests/test_config.py
+          backend/tests/test_storage_containment.py
+          backend/tests/test_release_security.py
+          backend/tests/test_auth_api.py
+          backend/tests/test_account_aliases.py
+          backend/tests/test_evidence_class_coverage.py
+          backend/tests/test_cloud_read_performance.py
+          -q

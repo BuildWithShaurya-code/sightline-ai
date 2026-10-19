@@ -1,0 +1,153 @@
+@import "tailwindcss";
+
+@theme {
+  --color-surface: #051424;
+  --color-surface-dim: #051424;
+  --color-surface-bright: #2c3a4c;
+  --color-surface-container-lowest: #010f1f;
+  --color-surface-container-low: #0d1c2d;
+  --color-surface-container: #122131;
+  --color-surface-container-high: #1c2b3c;
+  --color-surface-container-highest: #273647;
+  --color-on-surface: #d4e4fa;
+  --color-on-surface-variant: #e4beba;
+  --color-outline: #ab8986;
+  --color-outline-variant: #5b403e;
+
+  --color-primary: #ffb3ad;
+  --color-primary-container: #ff5451;
+  --color-on-primary: #68000a;
+  --color-on-primary-container: #5c0008;
+
+  --color-secondary: #4edea3;
+  --color-secondary-container: #00a572;
+  --color-secondary-fixed: #6ffbbe;
+  --color-on-secondary: #003824;
+
+  --color-tertiary: #ffb95f;
+  --color-tertiary-container: #ca8100;
+  --color-tertiary-fixed: #ffddb8;
+  --color-on-tertiary: #472a00;
+
+  --color-error: #ffb4ab;
+  --color-error-container: #93000a;
+  --color-on-error: #690005;
+  --color-on-error-container: #ffdad6;
+
+  /* Font Fallback Stack */
+  --font-headline: "Plus Jakarta Sans", "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-body: "Inter", "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --font-telemetry: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+@layer base {
+  html, body {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: #051424;
+    color: #d4e4fa;
+    font-family: var(--font-body);
+  }
+  body {
+    overscroll-behavior: none;
+  }
+
+  /* Clear focus-visible styles across all interactive elements */
+  :focus-visible {
+    outline: 2px solid #4edea3 !important;
+    outline-offset: 2px !important;
+  }
+}
+
+/* Tactical HUD & Radar Animations */
+@keyframes radarRotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.radar-sweep {
+  background: conic-gradient(from 0deg at 50% 50%, rgba(78, 222, 163, 0.15) 0deg, rgba(78, 222, 163, 0) 60deg, transparent 360deg);
+  animation: radarRotate 4s linear infinite;
+}
+
+@keyframes pulseHeroGlow {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(78, 222, 163, 0.25), 0 0 0 1px rgba(78, 222, 163, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 28px rgba(78, 222, 163, 0.6), 0 0 0 2px rgba(78, 222, 163, 0.85);
+  }
+}
+
+.hero-evidence-pulse {
+  animation: pulseHeroGlow 2.4s infinite ease-in-out;
+}
+
+/* Respect user's motion preferences per Task 4 */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .radar-sweep,
+  .hero-evidence-pulse,
+  .animate-pulse,
+  .animate-spin {
+    animation: none !important;
+  }
+}
+
+/* Custom scrollbar hiding with accessible scroll support */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Keep login fields navy even when a browser offers saved credentials. */
+.login-input { color-scheme: dark; caret-color: #4edea3; }
+.login-input:-webkit-autofill,
+.login-input:-webkit-autofill:hover,
+.login-input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #fff;
+  -webkit-box-shadow: 0 0 0 1000px #051424 inset;
+  caret-color: #4edea3;
+}
+.login-input:autofill { background: #051424; color: #fff; }
+
+/* Account forms share the same dark autofill treatment as sign-in. */
+.account-input { color-scheme: dark; caret-color: #4edea3; }
+.account-input:-webkit-autofill,
+.account-input:-webkit-autofill:hover,
+.account-input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #fff;
+  -webkit-box-shadow: 0 0 0 1000px #051424 inset;
+}
+.account-input:autofill { background: #051424; color: #fff; }
+
+.signin-slider-thumb {
+  transform: translateX(calc(var(--slide-progress) * (100cqw - 62px)));
+  transition: var(--slide-transition);
+  will-change: transform;
+}
+.signin-slider { container-type: inline-size; }
+.signin-slider-fill {
+  transform-origin: left center;
+  transform: scaleX(var(--slide-progress));
+  transition: var(--slide-transition);
+}
+
+/* The focus boundary includes each input's icon and password visibility control. */
+.login-field:focus-within {
+  border-color: #4edea3;
+  outline: 2px solid #4edea3;
+  outline-offset: 2px;
+}
+.login-field .login-input:focus-visible { outline: none !important; }
+.login-field button:focus-visible { outline-offset: 0 !important; }

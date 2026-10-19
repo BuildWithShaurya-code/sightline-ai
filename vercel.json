@@ -1,0 +1,87 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "services": {
+    "frontend": {
+      "root": ".",
+      "framework": "vite",
+      "installCommand": "npm ci",
+      "buildCommand": "node scripts/vercel-preflight.mjs && npm run build",
+      "outputDirectory": "dist"
+    },
+    "api": {
+      "root": "backend",
+      "runtime": "container",
+      "entrypoint": "Dockerfile.vercel"
+    },
+    "identity": {
+      "root": "backend",
+      "runtime": "container",
+      "entrypoint": "Dockerfile.identity"
+    }
+  },
+  "daemons": {
+    "analysis": {
+      "root": "backend",
+      "entrypoint": "Dockerfile.worker",
+      "instances": {
+        "hnd1": 1
+      },
+      "terminationGracePeriodSeconds": 30
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/v1/auth/(.*)",
+      "destination": {
+        "service": "identity"
+      }
+    },
+    {
+      "source": "/api/(.*)",
+      "destination": {
+        "service": "api"
+      }
+    },
+    {
+      "source": "/(.*)",
+      "destination": {
+        "service": "frontend"
+      }
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "no-referrer"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(self), microphone=(), geolocation=()"
+        }
+      ]
+    },
+    {
+      "source": "/index.html",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache"
+        }
+      ]
+    }
+  ],
+  "regions": [
+    "hnd1"
+  ]
+}

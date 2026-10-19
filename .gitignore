@@ -1,0 +1,74 @@
+# Node & Frontend
+node_modules/
+build/
+dist/
+coverage/
+.DS_Store
+*.log
+
+# Environment variables & secrets
+.env
+.env.*
+.env.local
+!.env.example
+*.pem
+*.key
+*.cert
+
+# Python Virtual Environments
+.venv/
+venv/
+env/
+ENV/
+qa/.venv/
+backend/.venv/
+
+# Python Cache & Compilation
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# Local Media & Storage (Uploads, Evidence, Frames)
+storage/
+media/
+backend/storage/
+backend/media/
+qa/screenshots/tmp/
+
+# Local Databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Model Weight Checkpoints (Do not commit binary weights to git)
+*.pt
+*.pth
+*.onnx
+*.engine
+*.bin
+*.weights
+*.safetensors
+backend/models/*.pt
+backend/models/*.zip
+!backend/models/README.md
+
+# Archives
+archives/
+*.zip
+*.tar.gz
+
+# Deployment state and private offline snapshots
+.vercel/
+backend/backups/
+backend/restored-storage-*/
+
+# Private evaluation media and browser evidence
+qa/data/
+qa/screenshots/
+.vercel
+.env*

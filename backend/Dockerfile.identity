@@ -1,0 +1,11 @@
+FROM python:3.12-slim-bookworm
+ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 STORAGE_BACKEND=supabase CLOUD_WORKER=false
+WORKDIR /app
+COPY requirements-identity.txt ./requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+COPY app ./app
+COPY certs ./certs
+RUN useradd --uid 10001 --create-home sightline
+USER sightline
+EXPOSE 8000
+CMD ["sh","-c","exec uvicorn app.identity:app --host 0.0.0.0 --port ${PORT:-8000} --workers 1 --no-access-log"]
