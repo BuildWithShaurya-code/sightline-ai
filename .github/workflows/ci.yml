@@ -44,10 +44,7 @@ jobs:
     timeout-minutes: 25
     env:
       ENVIRONMENT: test
-      MEDIA_DIR: ${{ runner.temp }}/sightline-test-storage/media
-      MODEL_PATH: ${{ runner.temp }}/not-provisioned.pt
       SUPABASE_URL: https://fixture.supabase.co
-      PYTHONPYCACHEPREFIX: ${{ runner.temp }}/sightline-pycache
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
@@ -57,6 +54,11 @@ jobs:
           python-version: '3.12'
           cache: pip
           cache-dependency-path: backend/requirements.txt
+      - name: Configure isolated test storage
+        run: |
+          printf 'MEDIA_DIR=%s/sightline-test-storage/media\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+          printf 'MODEL_PATH=%s/not-provisioned.pt\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+          printf 'PYTHONPYCACHEPREFIX=%s/sightline-pycache\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
       - name: Install OS libraries for OpenCV
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libgl1 libglib2.0-0
       - name: Install CPU inference wheels
