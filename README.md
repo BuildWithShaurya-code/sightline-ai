@@ -2,6 +2,8 @@
 
 **Find the moment. Review the evidence. Choose the response.**
 
+[![Repository checks](https://github.com/BuildWithShaurya-code/sightline-ai/actions/workflows/ci.yml/badge.svg)](https://github.com/BuildWithShaurya-code/sightline-ai/actions/workflows/ci.yml)
+
 SightLine turns camera footage into private, reviewable **person, mask and knife** detections. It combines a trained YOLO11 nano model with captured evidence, separate user accounts and an operator-controlled response workflow.
 
 [**Open the live app**](https://sightline-ai-eight.vercel.app) · [Source](https://github.com/BuildWithShaurya-code/sightline-ai) · [Two-minute demo](docs/DEMO_SCRIPT.md) · [Setup](docs/SETUP.md) · [Verification](docs/VERIFICATION.md)
@@ -137,6 +139,8 @@ Latest release checks, 19 October 2026 (local and hosted checks are distinguishe
 | Browser interaction | Passed | Immediate preview, pending upload, failure/retry, real History images and non-blocking return navigation |
 
 A controlled browser test measured **29.4 ms from Confirm Threat to a decoded photo preview while upload was deliberately paused**. A separate real-backend run made the first captured photo available to the UI in under 1 ms before waiting for upload/confirmation. These are different local measurements, not hosted latency promises. Server acknowledgements remain asynchronous. Representative accuracy, positive knife cases, hosted concurrency and real notification delivery need separate evaluation.
+
+GitHub’s clean Linux run passed both jobs for commit `eaf3afa`: frontend install/lint/build and behavior checks, plus backend dependency installation, `pip check` and the model-free tests. [Verified run](https://github.com/BuildWithShaurya-code/sightline-ai/actions/runs/39281684819). A fresh public clone also matched all 193 reviewed source/asset hashes.
 
 Reproduce the public checks:
 

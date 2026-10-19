@@ -172,3 +172,15 @@ Changes and downloadable source remain local. No GitHub upload or Vercel deploym
 ### Boundaries for this release
 
 Actual stored confirmation and response availability wait for server acknowledgement. Do not close a local-preview tab while its save is pending. Browser camera/notification permissions and audio restrictions apply. Dispatch remains simulation by default; no real emergency delivery was tested. Positive knife coverage, representative accuracy, concurrency/resource limits and a disaster-restore drill on the final host remain separate validation work. The existing baseline and AI-assisted pre-event work must be disclosed to HYPNEXIS organizers.
+
+
+## Public repository verification — 20 October 2026
+
+Published source: https://github.com/BuildWithShaurya-code/sightline-ai
+
+The initial workflow was rejected before execution because `runner.temp` was used in job-level environment expressions. Commit `eaf3afa8dcd51fbb4ecfc9db4e22f65624fbf32f` moved those paths into a runner setup step. [GitHub Actions run 39281684819](https://github.com/BuildWithShaurya-code/sightline-ai/actions/runs/39281684819) completed successfully for both jobs:
+
+- Frontend: clean `npm ci`, TypeScript/lint, Vite production build, deployment preflight, frontend behavior/rendering scripts and reviewed-package validation.
+- Backend: clean Python 3.12 Linux dependency installation including CPU inference wheels/OpenCV, `pip check` and public model-free security/contract tests.
+
+A separate fresh public clone matched the SHA-256 hashes of all 193 reviewed files in `PACKAGE_MANIFEST.json`. Private weights, videos, databases, environment credentials and owner data were excluded. The full 189-test local model-backed suite and hosted workflow are recorded above; the public CI subset does not claim private-model accuracy coverage. The README links the production app and verified workflow, and includes setup, architecture and demo guidance. Team identity, a consented demo recording, event reuse approval and final model/data licensing remain owner-provided submission material.

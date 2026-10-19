@@ -44,8 +44,8 @@
     },
     {
       "path": "README.md",
-      "sha256": "67c960268a310e13dcf60650b62bc4de233fcdf0adc6f64144aafcd9a0f39e37",
-      "bytes": 13821
+      "sha256": "db386a70d9f7800e88bd4597b0f9161c477f8597c0802e8cfc4a09d74028a97e",
+      "bytes": 14375
     },
     {
       "path": "SECURITY.md",
@@ -564,8 +564,8 @@
     },
     {
       "path": "docs/SUBMISSION_CHECKLIST.md",
-      "sha256": "02ea75d97ee8b74144d87faa049d5f4e21b035776cfde38418527854e644bbb4",
-      "bytes": 2090
+      "sha256": "2033f1c544a5c17bb9f6b65a5984b0ab655b0d2c4d9703b24a1823b156380c2d",
+      "bytes": 2212
     },
     {
       "path": "docs/VERCEL_PREPARATION_2026-10-19.md",
@@ -574,8 +574,8 @@
     },
     {
       "path": "docs/VERIFICATION.md",
-      "sha256": "733f241dd7684fc7a03d7a7d4dd96464ab88ef3eba9e06b62bb400ad891d4dbd",
-      "bytes": 27096
+      "sha256": "0045e723105d21a7ed16d938dbe81a4e96e774e92addcdc7525f239cd0a60098",
+      "bytes": 28511
     },
     {
       "path": "docs/assets/login.jpg",

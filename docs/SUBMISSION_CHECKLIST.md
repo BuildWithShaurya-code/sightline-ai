@@ -17,7 +17,7 @@ The production release is live and verified. Owner-supplied team/demo material a
 - [ ] Confirm application license, model/data/footage rights and required third-party notices.
 - [ ] Add actual team/contributor details, demo recording and verified links.
 - [x] Review the export manifest and scan the final tracked Git files/history; do not push the entire Downloads folder.
-- [ ] Create the intended GitHub repository and verify its first clean-clone CI run.
+- [x] Publish the intended public GitHub repository and verify its clean Linux CI run: both jobs passed for `eaf3afa` ([run](https://github.com/BuildWithShaurya-code/sightline-ai/actions/runs/39281684819)).
 - [ ] Supply private authorized model/fixtures for full-suite reproduction through an agreed channel.
 - [ ] Submit the actual PPT/project through the organizer portal. Nothing has been submitted by this task.
 
